@@ -9,7 +9,7 @@ int main(int argc, const char* argv[]) {
     cfg.setGameName("Colonizer");
     cfg.camera().m_fMaxDistance = 500.0f;
 
-    std::vector<Ice::SystemId> ids = { SystemId::DAY_NIGHT, SystemId::BIOME, SystemId::BEE };
+    std::vector<Ice::SystemId> ids = { SystemId::DAY_NIGHT, SystemId::BIOME, SystemId::BEE, SystemId::CHARACTER };
     cfg.setSystemIds(ids);
 
     Engine e{};

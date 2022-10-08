@@ -62,6 +62,9 @@
 #include <Importers/ModelImporterGlTF.h>
 #include <Components/Systems/AnimatedModelRenderingSystem.h>
 #include <Interfaces/IComponentManager.h>
+#include <Components/CharacterComponent.h>
+#include <Components/ActionComponents/WalkActionComponent.h>
+#include <Components/ActionComponents/PlaceBiomeNodeActionComponent.h>
 
 namespace Colonizer
 {
@@ -356,15 +359,16 @@ namespace Colonizer
         f2.close();
 
  
+        /*
         auto biomeEnt = entityManager.createEntity();
         auto biomeTransform = TransformComponent{};
         biomeTransform.m_transform = glm::translate(glm::mat4{1.0f}, glm::vec3{ 150.f, m_pTerrainSys->getHeight(150.0f, 170.0f), 170.0f });
         entityManager.addComponent(biomeEnt, biomeTransform);
-            //Ice::
-        //entityManager.addComponent(biomeEnt, BiomeNodeComponent{ BiomeType::GRASSLAND, RGBA( 36, 201, 130 ), 100.0_pct, 200.0f });
         entityManager.addComponent(biomeEnt, BiomeNodeComponent{ 1, BiomeType::SNOW, RGBA( 255, 255, 255 ), 0.0_pct, 200.0f, BiomeNodeComponent::State::EXPANDING });
+        */
 
         auto biomeEnt2 = entityManager.createEntity();
+        auto biomeTransform = TransformComponent{};
         biomeTransform.m_transform = glm::translate(glm::mat4{1.0f}, glm::vec3{ 150.f, m_pTerrainSys->getHeight(150.0f, 520.0f), 520.0f });
         entityManager.addComponent(biomeEnt2, biomeTransform);
             //Ice::
@@ -376,7 +380,7 @@ namespace Colonizer
         mMeshes.clear();
         beeModel.import(mMeshes);
         mat.materials() = beeModel.materials();
-        auto beeEnt = pBeeSystem->createBee(1);
+        auto beeEnt = pBeeSystem->createBee(2);
         auto& beeComp = entityManager.getComponent<BeeComponent>(beeEnt);
         beeComp.bindTransform = glm::scale(glm::mat4{1.0f}, glm::vec3{5.0f,5.0f,5.0f});
         entityManager.addComponent(beeEnt, mMeshes.begin()->second);
@@ -391,7 +395,7 @@ namespace Colonizer
         Ice::Entity manEntComp;
         if (!std::filesystem::exists(std::string{ AssetFile{ "Blueprints/character.txt"} }))
         {
-            manEntComp = AnimatedModelRenderingSystem::loadBlueprintFromExternalFile(AssetFile{ "adam2.gltf" });
+            manEntComp = AnimatedModelRenderingSystem::loadBlueprintFromExternalFile(AssetFile{ "astronaut.glb" });
             /*
             Ice::ModelImporterGlTF gltf{ AssetFile{ "adam2.gltf" } };
             gltf.import();
@@ -430,12 +434,23 @@ namespace Colonizer
         fHeight = m_pTerrainSys->getHeight(XZ.x, XZ.y, &matTerrain);
         auto manInst = AnimatedModelRenderingSystem::createInstance(manEntComp, matTerrain);
         auto& manInstAniComp = entityManager.getComponent<ModelAnimationComponent>(manInst);
-        manInstAniComp.pCurrent = &manInstAniComp.animations["Run"];
+        manInstAniComp.pCurrent = &manInstAniComp.animations["Idle"];
         XZ = m_pTerrainSys->getCenterCoordsForTile(terr, 1, 0);
         fHeight = m_pTerrainSys->getHeight(XZ.x, XZ.y, &matTerrain);
         auto manInst2 = AnimatedModelRenderingSystem::createInstance(manEntComp, matTerrain);
         auto& manInstAniComp2 = entityManager.getComponent<ModelAnimationComponent>(manInst2);
         manInstAniComp2.pCurrent = &manInstAniComp.animations["Idle"];
+
+        // TASKS FOR CHARACTER
+        CharacterComponent charComp;
+        charComp.actions.push_back(CharacterComponent::Action::WALK);
+        charComp.actions.push_back(CharacterComponent::Action::PLACE_BIOME_NODE);
+        entityManager.addComponent(manInst, charComp);
+        WalkActionComponent act;
+        act.target = glm::vec2{ 150.0f, 170.0f };
+        entityManager.addComponent(manInst, act);
+        entityManager.addComponent(manInst, PlaceBiomeNodeActionComponent{ BiomeType::SNOW });
+        
 
         std::random_device rd;
         std::mt19937 gen{rd()};
