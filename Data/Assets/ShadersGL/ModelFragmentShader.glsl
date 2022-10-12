@@ -1,8 +1,11 @@
 #version 410
 
+const float SPECULAR_STRENGTH = 0.5;
+
 in vec2 coord;
 in vec3 toLight;
 in vec3 outNormal;
+in vec3 toCamera;
 in vec2 shadowMapCoord;
 in float distToLight;
 in float distFromCam;
@@ -45,10 +48,12 @@ void main(void) {
         materialColor = vec4(diffuse, 1.0);
     else
         materialColor = texture(diffuseTex, coord);
-	float brightness = max(dot(toLight, outNormal), 0.0);
-	vec3 finalLight = brightness * sunColor;
-	outColor = materialColor * vec4(finalLight, 1.0) + materialColor * vec4(sunAmbient, 1.0);
-	//outColor = clamp(materialColor * vec4(finalLight, 1.0) + materialColor * vec4(sunAmbient, 1.0), vec4(0.0, 0.0, 0.0, 0.0), vec4(1.0, 1.0, 1.0, 1.0));
+	float brightnessDiffuse = max(dot(toLight, outNormal), 0.0);
+	// Blinn-phong specular shading
+	vec3 halfway = normalize(toCamera + toLight);
+	float brightnessSpecular = SPECULAR_STRENGTH * pow(max(dot(halfway, outNormal), 0.0), fSpecularExponent);
+	vec3 finalLight = (brightnessSpecular + brightnessDiffuse) * sunColor;
+	outColor = materialColor * (vec4(finalLight, 1.0) + vec4(sunAmbient, 1.0));
 	
 	const float fOneOverNumSamples = 1.0 / 25.0;
 	float fTotalShadow = 0.0;
