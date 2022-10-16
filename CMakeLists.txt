@@ -3,6 +3,14 @@ cmake_minimum_required(VERSION 3.21)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+#if (WIN32)
+#	if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+#		set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDebug")
+#	elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+#		set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
+#	endif()
+#endif()
+
 project(Colonizer)
 
 add_executable(${PROJECT_NAME}  
@@ -10,30 +18,49 @@ Colonizer.cpp
 main.cpp
 )
 
-find_library(iceengine iceengine)
-find_library(crossguid crossguid)
-find_library(uuid uuid)
-find_library(profiler profiler)
+if (UNIX)
+	find_library(iceengine iceengine)
+	find_library(crossguid crossguid)
+elseif (WIN32)
+	find_library(iceengine iceengine HINTS "C:/Program Files (x86)/libiceengine/lib")
+	#find_library(iceenginedbg iceengined HINTS "C:/Program Files (x86)/libiceengine/lib")
+	#find_library(crossguid crossguid HINTS "C:/Program Files (x86)/CrossGuid/lib")
+	#find_library(crossguiddbg crossguid-dgb HINTS "C:/Program Files (x86)/CrossGuid/lib")
+endif()
 
 if (NOT iceengine)
 	message(FATAL_ERROR "iceengine not found")
 endif()
+	
+if (UNIX)
+	find_library(uuid uuid)
+	find_library(profiler profiler)
 
-if (NOT crossguid)
-	message(FATAL_ERROR "Crossguid not found")
+	if (NOT uuid)
+		message(FATAL_ERROR "uuid not found")
+	endif()
+
+	if (NOT profiler)
+		message(FATAL_ERROR "profiler not found")
+	endif()
+#elseif (WIN32)
+#	find_library(SDL2_main NAMES SDL2main HINTS ../iceengine/external/windows/lib NO_DEFAULT_PATH)
+#	find_library(SDL2_maindbg NAMES SDL2maind HINTS ../iceengine/external/windows/lib NO_DEFAULT_PATH)
 endif()
 
-if (NOT uuid)
-	message(FATAL_ERROR "uuid not found")
+
+
+if (UNIX)
+	target_link_options(${PROJECT_NAME} PRIVATE -Wl,--no-as-needed)
+	target_compile_options(${PROJECT_NAME} PRIVATE -O0 -Wno-non-template-friend -Wno-volatile)
+	target_include_directories(${PROJECT_NAME} PUBLIC ../iceengine/headers PUBLIC ../iceengine/external/inc PUBLIC ../iceengine/external/inc/SDL2 PUBLIC .)
+	target_link_directories(${PROJECT_NAME} PRIVATE /usr/local/lib PRIVATE /usr/lib)
+	target_link_libraries(${PROJECT_NAME} ${iceengine} ${crossguid} ${uuid} ${profiler})
+elseif (WIN32)
+	target_include_directories(${PROJECT_NAME} PUBLIC "C:/Program Files (x86)/libiceengine/include/headers" PUBLIC ../iceengine/external/inc PUBLIC .)
+	target_link_libraries(${PROJECT_NAME} ${iceengine}) # $<$<CONFIG:Debug>:${iceenginedbg}> $<$<CONFIG:Release>:${iceengine}> $<$<CONFIG:Debug>:${crossguiddbg}> $<$<CONFIG:Release>:${crossguid}>)
 endif()
 
-if (NOT profiler)
-	message(FATAL_ERROR "profiler not found")
-endif()
 
-target_compile_options(${PROJECT_NAME} PRIVATE -O0 -Wno-non-template-friend -Wno-volatile)
-target_link_options(${PROJECT_NAME} PRIVATE -Wl,--no-as-needed)
-#target_link_options(${PROJECT_NAME} PRIVATE -pg)
-target_link_directories(${PROJECT_NAME} PRIVATE /usr/local/lib PRIVATE /usr/lib)
-target_include_directories(${PROJECT_NAME} PUBLIC ../iceengine/headers PUBLIC ../iceengine/external/inc PUBLIC ,,/iceengine/external/inc/SDL2 PUBLIC .)
-target_link_libraries(${PROJECT_NAME} iceengine crossguid uuid profiler)
+#set_property(TARGET ${PROJECT_NAME} PROPERTY 
+#   MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
