@@ -10,7 +10,20 @@ Colonizer.cpp
 main.cpp
 )
 
-find_library(iceengine iceengine)
+#[[
+set(CMAKE_VERBOSE_MAKEFILE ON)
+]]
+
+if (UNIX)
+   if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+      set(ICEENGINE_LIB_NAME "iceengined")
+   else()
+      set(ICEENGINE_LIB_NAME "iceengine")
+   endif()
+   message(STATUS "ICEENGINE_LIB_NAME = ${ICEENGINE_LIB_NAME}")
+endif()
+
+find_library(iceengine ${ICEENGINE_LIB_NAME})
 find_library(crossguid crossguid)
 find_library(uuid uuid)
 find_library(profiler profiler)
@@ -35,5 +48,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE -O0 -Wno-non-template-friend -Wno
 target_link_options(${PROJECT_NAME} PRIVATE -Wl,--no-as-needed)
 #target_link_options(${PROJECT_NAME} PRIVATE -pg)
 target_link_directories(${PROJECT_NAME} PRIVATE /usr/local/lib PRIVATE /usr/lib)
-target_include_directories(${PROJECT_NAME} PUBLIC ../iceengine/headers PUBLIC ../iceengine/external/inc PUBLIC ,,/iceengine/external/inc/SDL2 PUBLIC .)
-target_link_libraries(${PROJECT_NAME} iceengine crossguid uuid profiler)
+target_include_directories(${PROJECT_NAME} PRIVATE /usr/local/include/iceengine PRIVATE .)
+#target_include_directories(${PROJECT_NAME} PUBLIC ../iceengine/headers PUBLIC ../iceengine/external/inc PUBLIC ,,/iceengine/external/inc/SDL2 PUBLIC .)
+#target_include_directories(${PROJECT_NAME} PUBLIC ../iceengine/headers PUBLIC ../iceengine/external/inc PUBLIC ,,/iceengine/external/inc/SDL2 PUBLIC .)
+target_link_libraries(${PROJECT_NAME} ${iceengine} ${crossguid} ${uuid} ${profiler})
