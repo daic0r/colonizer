@@ -33,7 +33,7 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <Components/Systems/SaveSystem.h>
-#include <crossguid/guid.hpp>
+//#include <crossguid/guid.hpp>
 #include <System/File.h>
 #include <GUI/ListBox.h>
 #include <GUI/ImageView.h>
@@ -192,8 +192,8 @@ namespace Colonizer
 
         constexpr std::array<Ice::RGBA, 2> arColors {
             Ice::RGBA( 71, 19, 15 ),
-            //Ice::RGBA( 36, 201, 130 )
-           // Ice::RGBA( 255, 255, 255 )
+            Ice::RGBA( 36, 201, 130 )
+            //Ice::RGBA( 255, 255, 255 )
         };
         const auto retIndices = g.generateIndices();
         const auto [retVerts,retColors] = g.generateVerticesAndColors(TERRAIN_TILE_SIZE, TERRAIN_TILE_SIZE, fMinHeight, fMaxHeight, vHeightMap, arColors );
@@ -454,7 +454,7 @@ namespace Colonizer
 
         std::random_device rd;
         std::mt19937 gen{rd()};
-        std::uniform_real_distribution<> dist{ 0.0f, 64 * 15.0f };
+        std::uniform_real_distribution<> dist{ 0.0f, 63 * 15.0f };
         for (int i = 0; i < 9000; ++i) {
             auto tuftInst = entityManager.createEntity();
             m_pTerrainSys->getHeight(dist(gen), dist(gen), &matTerrain);
