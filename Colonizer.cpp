@@ -395,7 +395,7 @@ namespace Colonizer
         Ice::Entity manEntComp;
         if (!std::filesystem::exists(std::string{ AssetFile{ "Blueprints/character.txt"} }))
         {
-            manEntComp = AnimatedModelRenderingSystem::loadBlueprintFromExternalFile(AssetFile{ "astronaut.glb" });
+            manEntComp = AnimatedModelRenderingSystem::loadBlueprintFromExternalFile(AssetFile{ "astronaut animated.gltf" });
             /*
             Ice::ModelImporterGlTF gltf{ AssetFile{ "adam2.gltf" } };
             gltf.import();
@@ -430,7 +430,7 @@ namespace Colonizer
                 && entityManager.hasComponent<RenderMaterialsComponent>(manEntComp));
  
         }
-        XZ = m_pTerrainSys->getCenterCoordsForTile(terr, 0, 0);
+        XZ = m_pTerrainSys->getCenterCoordsForTile(terr, 8, 8);
         fHeight = m_pTerrainSys->getHeight(XZ.x, XZ.y, &matTerrain);
         auto manInst = AnimatedModelRenderingSystem::createInstance(manEntComp, matTerrain);
         auto& manInstAniComp = entityManager.getComponent<ModelAnimationComponent>(manInst);
